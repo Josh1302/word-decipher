@@ -2,12 +2,12 @@ import sys
 import socket
 import selectors
 import types
+import traceback
 
 sel = selectors.DefaultSelector()
 
 
-
-def start_connections(host, port, num_conns):
+def start_connections(host, port, num_conns, messages):
     server_addr = (host, port)
     for i in range(0, num_conns):
         connid = i + 1
@@ -25,8 +25,8 @@ def start_connections(host, port, num_conns):
         )
         sel.register(sock, events, data=data)
 
-# this routine is called when a client triggers a read or write event
 
+# this routine is called when a client triggers a read or write event
 def service_connection(key, mask):
     sock = key.fileobj
     data = key.data
@@ -41,7 +41,7 @@ def service_connection(key, mask):
             sock.close()
     if mask & selectors.EVENT_WRITE:
         if not data.outb and data.messages:
-            data.outb = data.messages.pop(0)
+            data.outb = data.messages.pop(0).encode()  # Convert to bytes
         if data.outb:
             print("sending", repr(data.outb), "to connection", data.connid)
             sent = sock.send(data.outb)  # Should be ready to write
@@ -53,21 +53,18 @@ if len(sys.argv) != 5:
     sys.exit(1)
 
 host, port = sys.argv[1], int(sys.argv[2])
-messages = sys.argv[3], sys.argv[4]
-request = create_request(action, value)
-start_connection(host, port, request)
-num_conns = 2       # you can change this to however many clients you want to create
+messages = [sys.argv[3], sys.argv[4]]  # Ensure messages is a list of strings
+num_conns = 2  # You can change this to however many clients you want to create
 
+# Start the connections
+start_connections(host, port, num_conns, messages)
 
-start_connections(host, port, num_conns)
-
-# the event loop
-
+# Event loop
 try:
     while True:
         events = sel.select(timeout=1)
-        if events:
-            for key, mask in events:
+        for key, mask in events:
+            if key.data:
                 service_connection(key, mask)
         # Check for a socket being monitored to continue.
         if not sel.get_map():
