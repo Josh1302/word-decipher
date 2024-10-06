@@ -65,7 +65,7 @@ def service_connection(key, mask):
 # main program
 
 host = '0.0.0.0'   # localhost; use 0.0.0.0 if you want to communicate across machines in a real network
-port = 12358         # I just love fibonacci numbers
+port = 12345         # I just love fibonacci numbers
 num_conns = 2       # you can change this to however many clients you want to create
 
 
