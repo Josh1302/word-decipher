@@ -3,7 +3,6 @@ import socket
 import selectors
 import traceback
 
-import libclient
 
 sel = selectors.DefaultSelector()
 
