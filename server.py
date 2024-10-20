@@ -20,7 +20,7 @@ def broadcast(sender_sock, message):
             data.outb += (message + '\n').encode()
 
 def accept_wrapper(sock):
-    conn, addr = sock.accept()  # Should be ready to read
+    conn, addr = sock.accept()
     print("Accepted connection from", addr)
     conn.setblocking(False)
     data = types.SimpleNamespace(addr=addr, inb=b"", outb=b"", username=None)
@@ -33,7 +33,7 @@ def service_connection(key, mask):
 
     if mask & selectors.EVENT_READ:
         try:
-            recv_data = sock.recv(1024)  # Should be ready to read
+            recv_data = sock.recv(1024)  
             if recv_data:
                 data.inb += recv_data
                 # Process messages (assuming newline-delimited JSON)
