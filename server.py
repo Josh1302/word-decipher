@@ -5,12 +5,15 @@ import socket
 import selectors
 import types
 import json
+import logging
 
 sel = selectors.DefaultSelector()
 
 
 clients = {}
 
+def log_tcp_connection(client_address):
+    logging.info(f"Connection from {client_address}")
 
 def broadcast(sender_sock, message):
     print(f"Broadcasting message: {message}")
@@ -22,6 +25,7 @@ def broadcast(sender_sock, message):
 def accept_wrapper(sock):
     conn, addr = sock.accept()
     print("Accepted connection from", addr)
+    log_tcp_connection(addr)
     conn.setblocking(False)
     data = types.SimpleNamespace(addr=addr, inb=b"", outb=b"", username=None)
     sel.register(conn, selectors.EVENT_READ | selectors.EVENT_WRITE, data=data)
