@@ -118,6 +118,22 @@ def handle_message(sock, msg):
     else:
         print(f"Unknown message type received from {data.addr}: {msg_type}")
 
+def update_game_state(update):
+    global game_state
+    if update["type"] == "join":
+        game_state['players'][update['username']] = {'status': 'joined'}
+    elif update["type"] == "move":
+        game_state['players'][update['username']]['move'] = update['move']
+    elif update["type"] == "leave":
+        del game_state['players'][update['username']]
+    broadcast_game_state()
+
+def broadcast_game_state():
+    game_state_msg = json.dumps({"type": "game_state", "state": game_state})
+    for sock in clients:
+        data = clients[sock]
+        data.outb += (game_state_msg + '\n').encode()
+
 def main():
     host = '0.0.0.0'  
     port = 12345
