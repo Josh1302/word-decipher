@@ -65,7 +65,7 @@ def service_connection(key, mask):
             print("Server closed connection")
             sel.unregister(sock)
             sock.close()
-            sys.exit(0)  # Exit the program
+            sys.exit(0) 
 
     if mask & selectors.EVENT_WRITE:
         if not data.outb and data.messages:
@@ -85,45 +85,61 @@ def handle_server_message(msg):
     msg_type = msg.get("type")
 
     if msg_type == "join_ack":
-        print(msg["message"])
+        print(msg["message"], "\n")
     elif msg_type == "join":
-        print(f"{msg['username']} has joined the game.")
+        print(f"{msg['username']} has joined the game.\n")
     elif msg_type == "move":
-        print(f"{msg['username']} made a move: {msg['move']}")
+        print(f"{msg['username']} guessed: {msg['move']}\n")  
     elif msg_type == "chat":
-        print(f"{msg['username']} says: {msg['message']}")
+        print(f"{msg['username']} says: {msg['message']}\n")
     elif msg_type == "leave" or msg_type == "quit":
-        print(f"{msg['username']} has left the game.")
+        print(f"{msg['username']} has left the game.\n")
+    elif msg_type == "win":
+        print(f"{msg['username']} won the game by guessing the word! New Game Starting...\n")
+    elif msg_type == "error":
+        print(f"Error: {msg['message']}\n")
     else:
-        print("Unknown message type received from server")
+        print("Unknown message type received from server\n")
 
 def input_thread(data):
     try:
+        
+        user_input = input("\nEnter command (/move <word>, /chat <message>, /quit): \n").strip()
+
         while True:
-            user_input = input()
             if user_input.startswith("/move "):
-                move_cmd = user_input.split("/move ", 1)[1]
-                move_msg = json.dumps({"type": "move", "move": move_cmd})
-                data.messages.append(move_msg)
-            elif user_input.startswith("/chat"):
-                if user_input == "/chat":
-                    print("Please provide a message to send. Usage: /chat <message>")
-                elif user_input.startswith("/chat "):
-                    chat_msg_text = user_input.split("/chat ", 1)[1]
+                move_cmd = user_input[6:].strip()
+                if len(move_cmd) == 5 and move_cmd.isalpha():
+                    move_msg = json.dumps({"type": "move", "move": move_cmd.lower()})
+                    data.messages.append(move_msg)
+                    print()  # Add a newline for better formatting
+                else:
+                    print("Invalid move. Please enter a valid 5-letter word.\n")
+            
+            elif user_input.startswith("/chat "):
+                chat_msg_text = user_input[6:].strip()
+                if chat_msg_text:
                     chat_msg = json.dumps({"type": "chat", "message": chat_msg_text})
                     data.messages.append(chat_msg)
+                    print()  
                 else:
-                    print("Unknown command. Use /move, /chat, or /quit.")
+                    print("Chat message cannot be empty.\n")
+
             elif user_input == "/quit":
                 quit_msg = json.dumps({"type": "quit"})
                 data.messages.append(quit_msg)
-                print("Disconnected from server")
+                print("Disconnected from server\n")
                 sys.exit(0)
+            
             else:
-                print("Unknown command. Use /move, /chat, or /quit.")
+                print("Unknown command. Valid commands are: /move <word>, /chat <message>, /quit.\n")
+
+            user_input = input("\nEnter command (/move <word>, /chat <message>, /quit): \n").strip()
+
     except EOFError:
-        pass
+        print("Exiting input thread.\n")
     except KeyboardInterrupt:
+        print("\nClient shutting down.\n")
         sys.exit(0)
 
 def main():
@@ -135,11 +151,9 @@ def main():
 
     data = start_connection(host, port, username)
 
-    
     net_thread = threading.Thread(target=network_thread, args=(data,), daemon=True)
     net_thread.start()
 
-    
     input_thread(data)
 
 if __name__ == "__main__":
