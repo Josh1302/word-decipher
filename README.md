@@ -13,3 +13,4 @@ This is a word game that tests which player can decipher the word first.
 **Tech used**
 * Python
 * Sockets
+* 5 letter words from kaggle dataset https://www.kaggle.com/datasets/cprosser3/wordle-5-letter-words?resource=download
