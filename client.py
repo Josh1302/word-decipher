@@ -143,11 +143,11 @@ def input_thread(data):
         sys.exit(0)
 
 def main():
-    if len(sys.argv) != 4:
-        print("Usage:", sys.argv[0], "<host> <port> <username>")
+    if len(sys.argv) != 6:
+        print("Usage:", sys.argv[0], "-p <host> -i <port> <username>")
         sys.exit(1)
 
-    host, port, username = sys.argv[1], int(sys.argv[2]), sys.argv[3]
+    host, port, username = sys.argv[2], int(sys.argv[4]), sys.argv[5]
 
     data = start_connection(host, port, username)
 

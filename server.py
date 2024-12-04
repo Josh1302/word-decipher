@@ -8,11 +8,19 @@ import json
 import random
 
 sel = selectors.DefaultSelector()
-WORDS = ["apple", "grape", "peach", "melon", "berry"]
-target_word = random.choice(WORDS)
 game_active = True
-
+WORDS = []
 clients = {}
+
+def generate_word_bank(file):
+    f = open(file, "r")
+    for word in f:
+      WORDS.append(str(word.strip()))
+    return WORDS
+
+WORDS = generate_word_bank("/s/chopin/g/under/josh1302/cs457labs/word-decipher/5_letters.txt")
+target_word = random.choice(WORDS)
+print(target_word)
 
 def reset_game():   
     global target_word, game_active
@@ -30,7 +38,8 @@ def generate_feedback(target, guess):
             feedback.append("*")
         else:
             feedback.append("-")
-    return "".join(feedback)
+    feedback = "".join(feedback) 
+    return f"{guess}\nFeedback: {feedback}"
 
 def broadcast(message):
     print(f"DEBUG: Broadcasting message: {message}")
@@ -147,13 +156,11 @@ def handle_message(sock, msg):
         broadcast(quit_msg)
         sel.unregister(sock)
         sock.close()
-        del clients[sock]
-
     else:
         print(f"Unknown message type received from {data.addr}: {msg_type}")
 
 def main():
-    host =  sys.argv[1]
+    host =  "0.0.0.0"
     port =  int(sys.argv[2])
 
     lsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
