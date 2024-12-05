@@ -6,6 +6,7 @@ import json
 import types
 
 sel = selectors.DefaultSelector()
+game_active = True
 
 def start_connection(host, port, username):
     server_addr = (host, port)
@@ -78,7 +79,7 @@ def service_connection(key, mask):
 
 def handle_server_message(msg):
     msg_type = msg.get("type")
-
+    global game_active
     if msg_type == "join_ack":
         print(msg["message"], "\n")
     elif msg_type == "join":
@@ -90,13 +91,17 @@ def handle_server_message(msg):
     elif msg_type == "leave" or msg_type == "quit":
         print(f"{msg['username']} has left the game.\n")
     elif msg_type == "win":
-        print(f"{msg['username']} won the game by guessing the word! New Game Starting...\n")
+        print(f"{msg['username']} won the game by guessing the word! Would you like to play again? /yes or /quit\n")
+        game_active = False
+    elif msg_type == "yes":
+        print(f"{msg['username']} Started new game....")
     elif msg_type == "error":
         print(f"Error: {msg['message']}\n")
     else:
         print("Unknown message type received from server\n")
 
 def input_thread(data):
+    global game_active
     try:
         
         user_input = input("\nEnter command (/move <word>, /chat <message>, /quit): \n").strip()
@@ -125,7 +130,12 @@ def input_thread(data):
                 data.messages.append(quit_msg)
                 print("Disconnected from server\n")
                 sys.exit(0)
-            
+
+            elif user_input == "/yes" and not game_active:
+                yes_msg = json.dumps({"type": "yes"})
+                data.messages.append(yes_msg)
+                game_active = True
+
             else:
                 print("Unknown command. Valid commands are: /move <word>, /chat <message>, /quit.\n")
 
