@@ -124,8 +124,13 @@ def handle_message(sock, msg):
             game_active = False
             win_msg = json.dumps({"type": "win", "username": username, "message": f"{username} guessed the word!"})
             broadcast(win_msg)
-            reset_game()
-
+            
+    elif msg_type == "yes" and not game_active:
+        username = data.username
+        yes_msg = json.dumps({"type": "yes", "username": username})
+        broadcast(yes_msg)
+        reset_game()
+    
     elif msg_type == "chat":
         chat_message = msg.get("message", "")
         username = data.username
