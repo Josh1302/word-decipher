@@ -10,6 +10,7 @@ This is a word game that tests which player can decipher the word first.
 6. **Winning screen** The first player to guess the word right will have their name apear with a winning message a new game with a new word will start.
 7. **Features added** /chat /move and /quit
 8.  **Synchronization added** clients are now updated in real time.
+
 **Tech used**
 * Python
 * Sockets
