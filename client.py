@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import sys
 import socket
 import selectors
@@ -42,8 +40,7 @@ def network_thread(data):
     except Exception as e:
         print(f"Network error: {e}")
     finally:
-        sel.unregister(sock)
-        sock.close()
+        close_connection(sock)
 
 def service_connection(key, mask):
     sock = key.fileobj
@@ -77,9 +74,7 @@ def service_connection(key, mask):
                 data.outb = data.outb[sent:]
             except OSError as e:
                 print(f"Error sending data: {e}")
-                sel.unregister(sock)
-                sock.close()
-                sys.exit(0)  # Exit the program
+                close_connection(sock)
 
 def handle_server_message(msg):
     msg_type = msg.get("type")
@@ -141,6 +136,16 @@ def input_thread(data):
     except KeyboardInterrupt:
         print("\nClient shutting down.\n")
         sys.exit(0)
+
+def close_connection(sock):
+    try:
+        if sock.fileno()!=-1:
+            sel.unregister(sock)
+    except Exception as e:
+        print(f"Unexpected error durring unregistration: {e}")
+    finally:
+        sock.close()
+        sys.exit(0) # exit program
 
 def main():
     if len(sys.argv) != 6:
