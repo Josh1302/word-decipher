@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import sys
 import socket
 import selectors
@@ -8,11 +6,19 @@ import json
 import random
 
 sel = selectors.DefaultSelector()
-WORDS = ["apple", "grape", "peach", "melon", "berry"]
-target_word = random.choice(WORDS)
 game_active = True
-
+WORDS = []
 clients = {}
+
+def generate_word_bank(file):
+    f = open(file, "r")
+    for word in f:
+      WORDS.append(str(word.strip()))
+    return WORDS
+
+WORDS = generate_word_bank("/s/chopin/g/under/josh1302/cs457labs/word-decipher/5_letters.txt")
+target_word = random.choice(WORDS)
+print(f"Target word: {target_word}")
 
 def reset_game():   
     global target_word, game_active
@@ -30,7 +36,8 @@ def generate_feedback(target, guess):
             feedback.append("*")
         else:
             feedback.append("-")
-    return "".join(feedback)
+    feedback = "".join(feedback) 
+    return f"{guess}\nFeedback: {feedback}"
 
 def broadcast(message):
     print(f"DEBUG: Broadcasting message: {message}")
@@ -65,20 +72,11 @@ def service_connection(key, mask):
                         print(f"DEBUG: Received invalid JSON message from {data.addr}")
             else:
                 print(f"DEBUG: Connection closed by client {data.addr}")
-                sel.unregister(sock)
-                sock.close()
-                if sock in clients:
-                    username = data.username
-                    del clients[sock]
-                    if username:
-                        leave_msg = json.dumps({"type": "leave", "username": username})
-                        broadcast(leave_msg)  
+                close_connection(sock)
+                  
         except Exception as e:
             print(f"DEBUG: Error reading from {data.addr}: {e}")
-            sel.unregister(sock)
-            sock.close()
-            if sock in clients:
-                del clients[sock]
+            close_connection(sock)
 
     if mask & selectors.EVENT_WRITE:
         if data.outb:
@@ -88,10 +86,7 @@ def service_connection(key, mask):
                 data.outb = data.outb[sent:]  
             except Exception as e:
                 print(f"DEBUG: Error writing to {data.addr}: {e}")
-                sel.unregister(sock)
-                sock.close()
-                if sock in clients:
-                    del clients[sock]
+                close_connection(sock)
 
 def handle_message(sock, msg):
     global game_active
@@ -145,15 +140,23 @@ def handle_message(sock, msg):
 
         quit_msg = json.dumps({"type": "quit", "username": username})
         broadcast(quit_msg)
-        sel.unregister(sock)
-        sock.close()
-        del clients[sock]
-
+        close_connection(sock)
     else:
         print(f"Unknown message type received from {data.addr}: {msg_type}")
 
+def close_connection(sock):
+    try:
+        if sock.fileno()!=-1:
+            sel.unregister(sock)
+    except Exception as e:
+        print(f"Unexpected error durring unregistration: {e}")
+    finally:
+        sock.close()
+        if sock in clients:
+            del clients[sock]
+
 def main():
-    host =  sys.argv[1]
+    host =  "0.0.0.0"
     port =  int(sys.argv[2])
 
     lsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
