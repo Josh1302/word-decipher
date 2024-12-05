@@ -18,7 +18,7 @@ def generate_word_bank(file):
 
 WORDS = generate_word_bank("/s/chopin/g/under/josh1302/cs457labs/word-decipher/5_letters.txt")
 target_word = random.choice(WORDS)
-print(target_word)
+print(f"Target word: {target_word}")
 
 def reset_game():   
     global target_word, game_active
@@ -154,7 +154,7 @@ def close_connection(sock):
         sock.close()
         if sock in clients:
             del clients[sock]
-            
+
 def main():
     host =  "0.0.0.0"
     port =  int(sys.argv[2])
