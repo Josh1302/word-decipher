@@ -16,7 +16,7 @@ def generate_word_bank(file):
       WORDS.append(str(word.strip()))
     return WORDS
 
-WORDS = generate_word_bank("/s/chopin/g/under/josh1302/cs457labs/word-decipher/5_letters.txt")
+WORDS = generate_word_bank("5_letters.txt")
 target_word = random.choice(WORDS)
 print(f"Target word: {target_word}")
 
