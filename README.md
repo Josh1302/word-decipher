@@ -15,3 +15,10 @@ This is a word game that tests which player can decipher the word first.
 * Python
 * Sockets
 * 5 letter words from kaggle dataset https://www.kaggle.com/datasets/cprosser3/wordle-5-letter-words?resource=download
+
+**Roadmap**
+* Taking this project further we would add a more in depth graphical user interface with a web server and clients using javascript and react. We would then add more features to the game for clients to interact with one another. Adding the ability to create user profiles, send invites, add friends, ...etc. This will create a much more in depth and fully developed game for users.
+
+**Retrospective**
+1. Things that went well for us as a team was working together and assigning tasks to one another to develop the entire project. The implementation of the client and server went really well as we were able to get them working together right away. This allowed us to work further on adding features and furthering the implementation of the game logic
+2. Some things that could have been improved is adding more features as well as implementing a further ui for users. We also could have added encryption with more time. 
